@@ -1,0 +1,38 @@
+{% set FILENAME = 'haproxy-1.8.19.tar.gz' %}
+{% set FILEDIR='haproxy-1.8.19' %}
+include:
+  - procinit.init
+
+haproxy-install:
+  file.managed:
+    - name: /app/source/{{ FILENAME }}
+    - source: salt://modules/haproxy/files/{{ FILENAME }}
+    - user: root
+    - group: root
+    - mode: 644
+    - require:
+      - file.softdir
+  
+  cmd.run:
+    - name: cd /app/source/ && tar zxf {{ FILENAME }} && cd {{FILEDIR}} && make TARGET=linux2628 USE_PCRE=1 USE_OPENSSL=1 USE_ZLIB=1 && make install PREFIX=/app/{{FILEDIR}} && ln -s /app/{{FILEDIR}} /app/haproxy
+    - unless: test -L /app/haproxy
+    - require:
+      - file.haproxy-install
+      - pkg.make-pkg
+/etc/init.d/haproxy:
+  - file.managed:
+    - source: salt://modules/haproxy/files/haproxy.init
+    - mode: 755
+    - user: root
+    - group: root
+    - require_in:
+      - file: haproxy-install
+net.ipv4.ip_nonlocal_bind:
+  sysctl.present:
+    - value: 1
+/etc/haproxy:
+  file.directory:
+    - user: root
+    - group: root
+    - mode: 755
+

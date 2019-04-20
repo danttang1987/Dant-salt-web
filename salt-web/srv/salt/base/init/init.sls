@@ -1,0 +1,14 @@
+include:
+  - init.audit
+  - init.dns
+  - init.epel
+  - init.history
+  - init.sysctl
+  - init.zabbix-agent
+  - init.tools
+  - init.sudoers
+  - init.selinux
+  - init.limit
+  - init.ntp
+  - init.ssh
+  - init.user
